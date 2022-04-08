@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use anyhow::Result;
-use sqlx::{PgPool, postgres::PgRow, Row};
+use sqlx::{PgPool, postgres::{PgRow, PgQueryResult}, Row};
 
 use crate::password::{hash_password, verify_password};
 
@@ -15,7 +15,7 @@ pub struct User {
     pub id: i32,
     pub username: String,
     pub password_hash: String,
-    pub created: Option<chrono::NaiveDateTime>,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl User {
@@ -55,6 +55,19 @@ impl User {
         Ok(user)
     }
 
+    pub async fn get_username(id: i32, pool: &PgPool) -> Result<String> {
+        let record = sqlx::query!(
+            r#"
+                SELECT username FROM users WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_one(pool)
+        .await?;
+
+        Ok(record.username)
+    }
+
     pub async fn find_by_username(username: String, pool: &PgPool) -> Result<Option<User>> {
         let user: Option<User> = sqlx::query_as!(
             User,
@@ -70,6 +83,19 @@ impl User {
         Ok(user)
     }
 
+    pub async fn get_id(username: String, pool: &PgPool) -> Result<i32> {
+        let record = sqlx::query!(
+            r#"
+                SELECT id FROM users WHERE username = $1
+            "#,
+            username
+        )
+        .fetch_one(pool)
+        .await?;
+
+        Ok(record.id)
+    }
+
     pub async fn validate_user(user: UserRequest, pool: &PgPool) -> Result<bool> {
         let record = sqlx::query!(
             r#"
@@ -83,5 +109,16 @@ impl User {
             .await?;
 
         Ok(verify_password(&user.password, record.password_hash))
+    }
+
+    pub async fn delete(id: i32, pool: &PgPool) -> Result<PgQueryResult> {
+        let mut table = pool.begin().await?;
+        let deleted = sqlx::query("DELETE FROM users WHERE id = $1")
+            .bind(id)
+            .execute(&mut table)
+            .await?;
+
+        table.commit().await?;
+        Ok(deleted)
     }
 }
