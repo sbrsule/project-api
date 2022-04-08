@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use anyhow::Result;
 use sqlx::{PgPool, postgres::{PgRow, PgQueryResult}, Row};
 
-use crate::password::{hash_password, verify_password};
+use super::password;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserRequest {
@@ -21,7 +21,7 @@ pub struct User {
 impl User {
     pub async fn create(user: UserRequest, pool: &PgPool) -> Result<User> {
         let mut table = pool.begin().await?;
-        let password = hash_password(user.password).unwrap();
+        let password = password::hash_password(user.password).unwrap();
         let user = sqlx::query("INSERT INTO USERS (username, passowrd_hash) values ($1, $2) RETURNING *")
             .bind(&user.username)
             .bind(&password)
@@ -108,7 +108,7 @@ impl User {
             .fetch_one(pool)
             .await?;
 
-        Ok(verify_password(&user.password, record.password_hash))
+        Ok(password::verify_password(&user.password, record.password_hash))
     }
 
     pub async fn delete(id: i32, pool: &PgPool) -> Result<PgQueryResult> {
