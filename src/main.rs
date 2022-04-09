@@ -2,6 +2,9 @@ use std::env::var;
 use actix_web::{HttpServer, App};
 use sqlx::postgres::PgPoolOptions;
 
+mod models;
+mod password;
+
 #[allow(deprecated)]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
