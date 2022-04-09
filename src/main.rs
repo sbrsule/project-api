@@ -1,3 +1,4 @@
+use std::env::var;
 use actix_web::{HttpServer, App};
 use sqlx::postgres::PgPoolOptions;
 
@@ -5,7 +6,7 @@ use sqlx::postgres::PgPoolOptions;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL variable in .env file!");
+    let db_url = var("DATABASE_URL").expect("Unable to read DATABASE_URL variable in .env file!");
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect(&db_url)
@@ -19,7 +20,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .data(pool.clone())
     })
-        .bind("127.0.0.1:8080")?
+        .bind(format!("{}:{}", var("HOST").unwrap(), var("PORT").unwrap()))?
         .run()
         .await
 }
