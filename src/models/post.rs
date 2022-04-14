@@ -59,4 +59,18 @@ impl Post {
         table.commit().await?;
         Ok(deleted)
     }
+
+    pub async fn get_user_id(post_id: i32, pool: &PgPool) -> Result<i32> {
+        let id = sqlx::query!(
+            r#"
+                SELECT user_id FROM posts
+                WHERE id = $1
+            "#,
+            post_id
+        )
+            .fetch_one(pool)
+            .await?;
+
+        Ok(id.user_id)
+    }
 }
