@@ -16,14 +16,14 @@ pub struct User {
     pub username: String,
     pub password_hash: String,
     pub created: chrono::NaiveDateTime,
-    pub signature: String,
+    pub signature: Option<String>,
 }
 
 impl User {
     pub async fn create(user: UserRequest, pool: &PgPool) -> Result<User> {
         let mut table = pool.begin().await?;
         let password = password::hash_password(user.password).unwrap();
-        let user = sqlx::query("INSERT INTO USERS (username, passowrd_hash) values ($1, $2) RETURNING *")
+        let user = sqlx::query("INSERT INTO USERS (username, password_hash) values ($1, $2) RETURNING *")
             .bind(&user.username)
             .bind(&password)
             .map(|row: PgRow| {
