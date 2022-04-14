@@ -18,7 +18,7 @@ pub struct Post {
 }
 
 impl Post {
-    pub async fn find_top_ten(pool: &PgPool) -> Result<Vec<Post>> {
+    pub async fn get_top_ten(pool: &PgPool) -> Result<Vec<Post>> {
         let posts: Vec<Post> = sqlx::query_as!(
             Post,
             r#"

@@ -32,6 +32,7 @@ async fn login_user(id: Identity, user: web::Json<UserRequest>, pool: web::Data<
         Err(_) => HttpResponse::NotFound().finish()
     }
 }
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register_user);
     cfg.service(login_user);

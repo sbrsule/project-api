@@ -3,6 +3,7 @@ use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{HttpServer, App};
 use sqlx::postgres::PgPoolOptions;
 use routes::user::init as user_init;
+use routes::post::init as post_init;
 
 mod models;
 mod routes;
@@ -30,6 +31,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .data(pool.clone())
             .configure(user_init)
+            .configure(post_init)
     })
         .bind(format!("{}:{}", var("HOST").unwrap(), var("PORT").unwrap()))?
         .run()
