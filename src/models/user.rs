@@ -110,7 +110,21 @@ impl User {
             .fetch_one(pool)
             .await?;
 
-        Ok(password::verify_password(&user.password, record.password_hash))
+        Ok(password::verify_password(user.password, record.password_hash))
+    }
+    
+    pub async fn get_password(user: UserRequest, pool: &PgPool) -> Result<String> {
+        let record = sqlx::query!(
+            r#"
+                SELECT password_hash FROM users
+                WHERE username = $1
+            "#,
+            user.username
+        )
+            .fetch_one(pool)
+            .await?;
+
+        Ok(record.password_hash)
     }
 
     pub async fn delete(id: i32, pool: &PgPool) -> Result<PgQueryResult> {

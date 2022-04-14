@@ -1,4 +1,5 @@
 use std::env::var;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{HttpServer, App};
 use sqlx::postgres::PgPoolOptions;
 use routes::user::init as user_init;
@@ -21,6 +22,11 @@ async fn main() -> std::io::Result<()> {
         let cors = actix_cors::Cors::permissive();
 
         App::new()
+        .wrap(IdentityService::new(
+            CookieIdentityPolicy::new(&[0; 32])
+            .name("auth")
+            .secure(false)
+        ))
             .wrap(cors)
             .data(pool.clone())
             .configure(user_init)

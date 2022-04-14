@@ -19,7 +19,7 @@ pub fn hash_password(password: String) -> Result<String> {
     Ok(password_hash.unwrap().to_string())
 }
 
-pub fn verify_password(password: &String, hashed_password: String) -> bool {
+pub fn verify_password(password: String, hashed_password: String) -> bool {
     let parsed_hash = PasswordHash::new(&hashed_password).unwrap();
     Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
 
