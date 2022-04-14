@@ -16,6 +16,7 @@ pub struct User {
     pub username: String,
     pub password_hash: String,
     pub created: chrono::NaiveDateTime,
+    pub signature: String,
 }
 
 impl User {
@@ -31,6 +32,7 @@ impl User {
                     username: row.get(1),
                     password_hash: row.get(2),
                     created: row.get(3),
+                    signature: row.get(4),
                 }
             })
             .fetch_one(&mut table)
