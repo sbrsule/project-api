@@ -5,7 +5,7 @@ use sqlx::{PgPool, postgres::{PgRow, PgQueryResult}, Row};
 #[derive(Serialize, Deserialize)]
 pub struct PostRequest {
     pub body: String,
-    pub user_id: i32,
+    pub subject: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -13,6 +13,7 @@ pub struct Post {
     pub id: i32,
     pub user_id: i32,
     pub body: String,
+    pub subject: String,
     pub created: chrono::NaiveDateTime,
     pub reply_id: Vec<i32>,
 }
@@ -33,13 +34,17 @@ impl Post {
         Ok(posts)
     }
 
-    pub async fn create_post(post: PostRequest, pool: &PgPool) -> Result<PgQueryResult> {
+    pub async fn create_post(user_id: i32, post: PostRequest, pool: &PgPool) -> Result<PgQueryResult> {
         let mut table = pool.begin().await?;
+        let replies: Vec::<i32> = vec![];
+        println!("Debug");
         let created = sqlx::query("
-            INSERT INTO posts (body, user_id) values ($1, $2) RETURNING *
+            INSERT INTO posts (body, subject, user_id, reply_id) values ($1, $2, $3, $4) RETURNING *
         ")
             .bind(post.body)
-            .bind(post.user_id)
+            .bind(post.subject)
+            .bind(user_id)
+            .bind(replies)
             .execute(&mut table)
             .await?;
 

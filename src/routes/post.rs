@@ -5,11 +5,16 @@ use sqlx::PgPool;
 use crate::models::post::{Post, PostRequest};
 
 #[post("/create_post")]
-async fn create_post(post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
-    let post = Post::create_post(post.into_inner(), pool.as_ref()).await;
-    match post {
-        Ok(_) => HttpResponse::Created().finish(),
-        Err(_) => HttpResponse::BadRequest().finish(),
+async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
+    match id.identity() {
+        Some(id) => {
+            let user_id= id.parse::<i32>().expect("unable to parse id");
+            match Post::create_post(user_id, post.into_inner(), pool.as_ref()).await {
+                Ok(_) => HttpResponse::Created().finish(),
+                Err(_) => HttpResponse::BadRequest().body("unable to post"),
+            }
+        }
+        None => HttpResponse::Unauthorized().body("unable to get identity"),
     }
 }
 

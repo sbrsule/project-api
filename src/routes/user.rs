@@ -19,18 +19,25 @@ async fn register_user(id: Identity, user: web::Json<UserRequest>, pool: web::Da
 async fn login_user(id: Identity, user: web::Json<UserRequest>, pool: web::Data<PgPool>) -> HttpResponse {
     let username = user.username.clone();
     let password = user.password.clone();
-    let user_id = User::get_id(username, pool.get_ref()).await.expect("Could'nt find user id");
-    match User::get_password(user.into_inner(), pool.get_ref()).await {
-        Ok(password_hash) => {
-            match crate::models::password::verify_password(password, password_hash) {
-                true => {
-                    id.remember(user_id.to_string());
-                    HttpResponse::Accepted().finish()
+    match User::get_id(username, pool.as_ref()).await {
+        Ok(user_id) => {
+            let user_id = user_id;
+            match User::get_password(user.into_inner(), pool.get_ref()).await {
+                Ok(password_hash) => {
+                    match crate::models::password::verify_password(password, password_hash) {
+                        true => {
+                            id.remember(user_id.to_string());
+                            HttpResponse::Accepted().finish()
+                        }
+                        false => HttpResponse::Unauthorized().finish()
+                    }
                 }
-                false => HttpResponse::Unauthorized().finish()
+                Err(_) => HttpResponse::NotFound().finish()
             }
         }
-        Err(_) => HttpResponse::NotFound().finish()
+        Err(_) => {
+            return HttpResponse::NotFound().finish();
+        }
     }
 }
 
@@ -52,8 +59,6 @@ async fn logout_user(id: Identity) -> HttpResponse {
         None => HttpResponse::NotFound().finish()
     }
 }
-
-
 
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register_user);
