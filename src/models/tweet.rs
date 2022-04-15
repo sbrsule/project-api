@@ -18,6 +18,8 @@ pub struct Tweet {
     pub user_id: i32,
 }
 
+#[allow(dead_code)]
+
 impl Tweet {
     pub async fn find_all(pool: &PgPool) -> Result<Vec<Tweet>> {
         let mut tweets = vec![];
@@ -69,7 +71,7 @@ impl Tweet {
     }
     
     pub async fn find_by_id(id: i64, pool: &PgPool) -> Result<Tweet> {
-        let mut tweet = sqlx::query_as!(
+        let tweet = sqlx::query_as!(
             Tweet,
             r#"
                 SELECT * FROM tweets WHERE id = $1
