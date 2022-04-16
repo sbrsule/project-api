@@ -24,7 +24,7 @@ impl Post {
             Post,
             r#"
                 SELECT DISTINCT * FROM posts
-                ORDER BY created
+                ORDER BY created DESC
                 FETCH FIRST 10 ROWS ONLY 
             "#
         )
