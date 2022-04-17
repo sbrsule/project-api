@@ -44,6 +44,14 @@ async fn get_top_ten(pool: web::Data<PgPool>) -> HttpResponse {
     }
 }
 
+#[get("/post/{id}")]
+async fn get_post(post_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
+    match Post::get_post(post_id.into_inner(), pool.as_ref()).await {
+        Ok(post) => HttpResponse::Ok().json(post),
+        Err(_) => HttpResponse::NotFound().finish(),
+    }
+}
+
 #[get("/replies/{id}")]
 async fn get_replies(post_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
     let replies = Post::get_replies(post_id.into_inner(), pool.as_ref()).await;
@@ -77,6 +85,9 @@ async fn delete_post(id: Identity, post_id: web::Json<i32>, pool: web::Data<PgPo
 
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(create_post);
+    cfg.service(create_reply);
     cfg.service(get_top_ten);
     cfg.service(delete_post);
+    cfg.service(get_replies);
+    cfg.service(get_post);
 }

@@ -35,6 +35,21 @@ impl Post {
         Ok(posts)
     }
 
+    pub async fn get_post(post_id: i32, pool: &PgPool) -> Result<Post> {
+        let post = sqlx::query_as!(
+            Post,
+            r#"
+                SELECT * FROM posts
+                WHERE id = $1
+            "#,
+            post_id
+        )
+            .fetch_one(pool)
+            .await?;
+
+        Ok(post)
+    }
+
     pub async fn create_post(user_id: i32, post: PostRequest, pool: &PgPool) -> Result<PgQueryResult> {
         let mut table = pool.begin().await?;
         let replies: Vec::<i32> = vec![];
