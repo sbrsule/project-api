@@ -11,10 +11,27 @@ async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data
             let user_id= id.parse::<i32>().expect("unable to parse id");
             match Post::create_post(user_id, post.into_inner(), pool.as_ref()).await {
                 Ok(_) => HttpResponse::Created().finish(),
-                Err(_) => HttpResponse::BadRequest().body("unable to post"),
+                Err(_) => HttpResponse::BadRequest().finish(),
             }
         }
-        None => HttpResponse::Unauthorized().body("unable to get identity"),
+        None => HttpResponse::Unauthorized().finish(),
+    }
+}
+
+#[post("/create_reply/{id}")]
+async fn create_reply(id: Identity, post: web::Json<PostRequest>, parent_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
+    match id.identity() {
+        Some(id) => {
+            let user_id = id.parse::<i32>().expect("unable to parse id");
+            match Post::create_reply(user_id, post.into_inner(), pool.as_ref()).await {
+                Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
+                    Ok(_) => HttpResponse::Created().finish(),
+                    Err(_) => HttpResponse::BadRequest().finish(),
+                }
+                Err(_) => HttpResponse::BadRequest().finish(),
+            }
+        }
+        None => HttpResponse::Unauthorized().finish()
     }
 }
 
@@ -24,6 +41,15 @@ async fn get_top_ten(pool: web::Data<PgPool>) -> HttpResponse {
     match posts {
         Ok(posts) => HttpResponse::Ok().json(posts),
         Err(_) => HttpResponse::NotFound().finish(),
+    }
+}
+
+#[get("/replies/{id}")]
+async fn get_replies(post_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
+    let replies = Post::get_replies(post_id.into_inner(), pool.as_ref()).await;
+    match replies {
+        Ok(replies) => HttpResponse::Ok().body("ok"),
+        Err(_) => HttpResponse::NotFound().body("yikes"),
     }
 }
 

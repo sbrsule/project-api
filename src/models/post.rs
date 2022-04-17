@@ -16,6 +16,7 @@ pub struct Post {
     pub subject: String,
     pub created: chrono::NaiveDateTime,
     pub reply_id: Vec<i32>,
+    pub reply: bool,
 }
 
 impl Post {
@@ -37,7 +38,6 @@ impl Post {
     pub async fn create_post(user_id: i32, post: PostRequest, pool: &PgPool) -> Result<PgQueryResult> {
         let mut table = pool.begin().await?;
         let replies: Vec::<i32> = vec![];
-        println!("Debug");
         let created = sqlx::query("
             INSERT INTO posts (body, subject, user_id, reply_id) values ($1, $2, $3, $4) RETURNING *
         ")
@@ -50,6 +50,46 @@ impl Post {
 
         table.commit().await?;
         Ok(created)
+    }
+
+    pub async fn create_reply(user_id: i32, post: PostRequest, pool: &PgPool) -> Result<i32> {
+        let mut table = pool.begin().await?;
+        let replies: Vec::<i32> = vec![];
+        let id = 0;
+        let created = sqlx::query!(
+            r#"
+            INSERT INTO posts (body, subject, user_id, reply_id, reply) 
+            values ($1, $2, $3, $4, $5) RETURNING id 
+            "#,
+            post.body,
+            post.subject,
+            user_id,
+            &replies,
+            true,
+        )
+            .fetch_one(&mut table)
+            .await?;
+
+        table.commit().await?;
+        Ok(created.id)
+    }
+
+    pub async fn link_reply(parent_id: i32, reply_id: i32, pool: &PgPool) -> Result<PgQueryResult> {
+        let mut table = pool.begin().await?;
+        let linked = sqlx::query!(
+            r#"
+            UPDATE posts
+            SET reply_id = array_append(reply_id, $1)
+            WHERE id = $2
+            "#,
+            reply_id,
+            parent_id,
+        )
+            .execute(&mut table)
+            .await?;
+
+        table.commit().await?;
+        Ok(linked)
     }
 
     pub async fn delete_post(post_id: i32, pool: &PgPool) -> Result<PgQueryResult> {
@@ -77,5 +117,37 @@ impl Post {
             .await?;
 
         Ok(id.user_id)
+    }
+
+    pub async fn get_replies(post_id: i32, pool: &PgPool) -> Result<Vec<Post>> {
+        let record = sqlx::query!(
+            r#"
+                SELECT reply_id FROM posts
+                WHERE id = $1
+            "#,
+            post_id
+        )
+            .fetch_one(pool)
+            .await?;
+
+        let reply_id = record.reply_id;
+        let mut replies: Vec<Post> = vec![];
+
+        for id in reply_id.iter() {
+            let reply = sqlx::query_as!(
+                Post,
+                r#"
+                    SELECT * FROM posts
+                    WHERE id = $1
+                "#,
+                id
+            )
+                .fetch_one(pool)
+                .await?;
+
+            replies.push(reply)
+        }
+
+        Ok(replies)
     }
 }
