@@ -2,16 +2,19 @@ use actix_identity::Identity;
 use actix_web::{web, HttpResponse, get, post, delete, http::header::HttpDate};
 use sqlx::PgPool;
 
-use crate::models::post::{Post, PostRequest};
+use crate::models::{post::{Post, PostRequest}, user::User};
 
 #[post("/create_post")]
 async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            let user_id= id.parse::<i32>().expect("unable to parse id");
-            match Post::create_post(user_id, post.into_inner(), pool.as_ref()).await {
-                Ok(_) => HttpResponse::Created().finish(),
-                Err(_) => HttpResponse::BadRequest().finish(),
+            match User::get_id(id, pool.as_ref()).await {
+                Ok(id) => { match Post::create_post(id , post.into_inner(), pool.as_ref()).await {
+                        Ok(_) => HttpResponse::Created().finish(),
+                        Err(_) => HttpResponse::BadRequest().finish(),
+                    }
+                }
+                Err(_) => HttpResponse::NotFound().finish(),
             }
         }
         None => HttpResponse::Unauthorized().finish(),
