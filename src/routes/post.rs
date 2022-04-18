@@ -25,13 +25,16 @@ async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data
 async fn create_reply(id: Identity, post: web::Json<PostRequest>, parent_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            let user_id = id.parse::<i32>().expect("unable to parse id");
-            match Post::create_reply(user_id, post.into_inner(), pool.as_ref()).await {
-                Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
-                    Ok(_) => HttpResponse::Created().finish(),
-                    Err(_) => HttpResponse::BadRequest().finish(),
+            match User::get_id(id, pool.as_ref()).await {
+                Ok(id) => { match Post::create_reply(id, post.into_inner(), pool.as_ref()).await {
+                        Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
+                            Ok(_) => HttpResponse::Created().finish(),
+                            Err(_) => HttpResponse::BadRequest().finish(),
+                        }
+                        Err(_) => HttpResponse::BadRequest().finish(),
+                    }
                 }
-                Err(_) => HttpResponse::BadRequest().finish(),
+                Err(_) => HttpResponse::NotFound().finish(),
             }
         }
         None => HttpResponse::Unauthorized().finish()
