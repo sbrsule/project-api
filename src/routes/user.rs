@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::{post, web, HttpResponse, get};
+use actix_web::{post, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::models::user::{User, UserRequest, UserID};

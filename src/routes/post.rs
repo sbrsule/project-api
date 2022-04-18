@@ -1,8 +1,8 @@
 use actix_identity::Identity;
-use actix_web::{web, HttpResponse, get, post, delete, http::header::HttpDate};
+use actix_web::{web, HttpResponse, get, post, delete};
 use sqlx::PgPool;
 
-use crate::models::{post::{Post, PostRequest}, user::User};
+use crate::models::{post::{Post, PostRequest}};
 
 #[post("/create_post")]
 async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
@@ -71,11 +71,10 @@ async fn delete_post(id: Identity, post_id: web::Json<i32>, pool: web::Data<PgPo
 
     match id.identity() {
         Some(id) => match id.parse::<i32>().unwrap() {
-            user_id => match Post::delete_post(post_id.clone(), pool.as_ref()).await {
+            _ => match Post::delete_post(post_id.clone(), pool.as_ref()).await {
                 Ok(_) => HttpResponse::NoContent().finish(),
                 Err(_) => HttpResponse::NotFound().finish(),
             },
-            _ => HttpResponse::Unauthorized().finish(),
         }
         None => HttpResponse::BadRequest().finish(),
     }
