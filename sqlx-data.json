@@ -1,0 +1,408 @@
+{
+  "db": "PostgreSQL",
+  "1546c5247fd9ffea2446c2887bb5218d5848221746109d8730088c72246adb02": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "body",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "created",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "reply_id",
+          "ordinal": 4,
+          "type_info": "Int4Array"
+        },
+        {
+          "name": "subject",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "reply",
+          "ordinal": 6,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                    SELECT * FROM posts\n                    WHERE id = $1\n                "
+  },
+  "155c466ee356dfdc5196d5efbff597c5ab036967fe491f61b70e814a79d46d72": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "body",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "created",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "reply_id",
+          "ordinal": 4,
+          "type_info": "Int4Array"
+        },
+        {
+          "name": "subject",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "reply",
+          "ordinal": 6,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM posts\n                WHERE id = $1\n            "
+  },
+  "37dcdec0e13a0d6f92ea64069bbdda52b76c9e6c4426df5c82998c7ddb57f997": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "body",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "created",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "reply_id",
+          "ordinal": 4,
+          "type_info": "Int4Array"
+        },
+        {
+          "name": "subject",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "reply",
+          "ordinal": 6,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n                SELECT DISTINCT * FROM posts\n                WHERE reply = false\n                ORDER BY created DESC\n                FETCH FIRST 10 ROWS ONLY \n            "
+  },
+  "4386a837817f6d816e69591efbe6b327f18f42826b63c305011c737ec6ac865b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                SELECT username, password_hash\n                    FROM users\n                WHERE username = $1\n            "
+  },
+  "5961ab5af46e60c1e4c5253b3118920abc0ee2eb5d3f57ec580fbfcb953d1f63": {
+    "describe": {
+      "columns": [
+        {
+          "name": "password_hash",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                SELECT password_hash FROM users\n                WHERE username = $1\n            "
+  },
+  "668fbbcfd8fff516f50cf44f5a4e6d121ed217d1e8e458033e0d1bed338add36": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT username FROM users WHERE id = $1\n            "
+  },
+  "7b58b1c4c9f38534b3c5a76481c3113853aeb55dad46e0fecabaf7f4e42a7e3c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT user_id FROM posts\n                WHERE id = $1\n            "
+  },
+  "8eda9286c1a5496b1e1c6a084aad7ab68594ddde21d8ea26cd5c08357c20f9a9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                SELECT id FROM users WHERE username = $1\n            "
+  },
+  "939284acfae8c276a2a959e63fe206082ee5cc6a372a7c5498636bfa6f2c4b1d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "reply_id",
+          "ordinal": 0,
+          "type_info": "Int4Array"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT reply_id FROM posts\n                WHERE id = $1\n            "
+  },
+  "b2f82503135861043c852764286a61813f7e25f5dac44c1837f959f3dfb22faa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM users\n                WHERE id = $1\n            "
+  },
+  "c129d1a2ddcb0ec4b72076c9a08daa5d67c39ed1946064aa3eaaade58f56274f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Int4",
+          "Int4Array",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO posts (body, subject, user_id, reply_id, reply) \n            values ($1, $2, $3, $4, $5) RETURNING id \n            "
+  },
+  "e4dae865ea0993a8176e1405cdb418f4d5e2ab25dcd4a2e7b0095006a327e578": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM users\n                WHERE username = $1    \n            "
+  },
+  "fde808b3ba4758c9a6d2535a50992af261394e6cf37572d2403877cdf7a513df": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            UPDATE posts\n            SET reply_id = array_append(reply_id, $1)\n            WHERE id = $2\n            "
+  }
+}

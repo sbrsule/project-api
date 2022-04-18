@@ -18,16 +18,34 @@ pub struct User {
     pub created: chrono::NaiveDateTime,
 }
 
+<<<<<<< HEAD
 #[allow(dead_code)]
+=======
+#[derive(Serialize, Deserialize)]
+pub struct UserName {
+    pub username: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct  UserID {
+    pub id: i32,
+}
+>>>>>>> newdb
 
 impl User {
     pub async fn create(user: UserRequest, pool: &PgPool) -> Result<User> {
         let mut table = pool.begin().await?;
         let password = password::hash_password(user.password).unwrap();
+<<<<<<< HEAD
         println!("{}", &password);
         let user = sqlx::query("INSERT INTO USERS (username, password_hash) values ($1, $2) RETURNING *")
             .bind(user.username)
             .bind(password)
+=======
+        let user = sqlx::query("INSERT INTO USERS (username, password_hash) values ($1, $2) RETURNING *")
+            .bind(&user.username)
+            .bind(&password)
+>>>>>>> newdb
             .map(|row: PgRow| {
                 User {
                     id: row.get(0),
@@ -58,27 +76,28 @@ impl User {
         Ok(user)
     }
 
-    pub async fn get_username(id: i32, pool: &PgPool) -> Result<String> {
-        let record = sqlx::query!(
+    pub async fn get_username(id: UserID, pool: &PgPool) -> Result<UserName> {
+        let record = sqlx::query_as!(
+            UserName,
             r#"
                 SELECT username FROM users WHERE id = $1
             "#,
-            id
+            id.id
         )
         .fetch_one(pool)
         .await?;
 
-        Ok(record.username)
+        Ok(record)
     }
 
-    pub async fn find_by_username(username: String, pool: &PgPool) -> Result<Option<User>> {
+    pub async fn find_by_username(username: UserName, pool: &PgPool) -> Result<Option<User>> {
         let user: Option<User> = sqlx::query_as!(
             User,
             r#"
                 SELECT * FROM users
                 WHERE username = $1    
             "#,
-            username,
+            username.username,
         )
             .fetch_optional(pool)
             .await?;
@@ -111,6 +130,23 @@ impl User {
             .fetch_one(pool)
             .await?;
 
+<<<<<<< HEAD
+=======
+        Ok(password::verify_password(user.password, record.password_hash))
+    }
+    
+    pub async fn get_password(user: UserRequest, pool: &PgPool) -> Result<String> {
+        let record = sqlx::query!(
+            r#"
+                SELECT password_hash FROM users
+                WHERE username = $1
+            "#,
+            user.username
+        )
+            .fetch_one(pool)
+            .await?;
+
+>>>>>>> newdb
         Ok(record.password_hash)
     }
 
