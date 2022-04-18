@@ -56,8 +56,8 @@ async fn get_post(post_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpRespo
 async fn get_replies(post_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
     let replies = Post::get_replies(post_id.into_inner(), pool.as_ref()).await;
     match replies {
-        Ok(replies) => HttpResponse::Ok().body("ok"),
-        Err(_) => HttpResponse::NotFound().body("yikes"),
+        Ok(replies) => HttpResponse::Ok().json(replies),
+        Err(_) => HttpResponse::NotFound().finish(),
     }
 }
 

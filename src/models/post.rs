@@ -25,6 +25,7 @@ impl Post {
             Post,
             r#"
                 SELECT DISTINCT * FROM posts
+                WHERE reply = false
                 ORDER BY created DESC
                 FETCH FIRST 10 ROWS ONLY 
             "#

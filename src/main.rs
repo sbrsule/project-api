@@ -1,6 +1,7 @@
 use std::env::var;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{HttpServer, App};
+use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use routes::user::init as user_init;
 use routes::post::init as post_init;
@@ -13,10 +14,7 @@ mod routes;
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     let db_url = var("DATABASE_URL").expect("Unable to read DATABASE_URL variable in .env file!");
-    let pool = PgPoolOptions::new()
-        .max_connections(10)
-        .connect(&db_url)
-        .await
+    let pool = PgPool::connect_lazy(&db_url)
         .expect("Unable to create database pool");
 
     HttpServer::new(move || {
