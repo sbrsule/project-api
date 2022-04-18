@@ -32,6 +32,7 @@ pub struct  UserID {
 }
 >>>>>>> newdb
 
+#[allow(dead_code)]
 impl User {
     pub async fn create(user: UserRequest, pool: &PgPool) -> Result<User> {
         let mut table = pool.begin().await?;

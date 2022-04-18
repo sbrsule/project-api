@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
-use sqlx::{PgPool, postgres::{PgRow, PgQueryResult}, Row};
+use sqlx::{PgPool, postgres::{PgQueryResult}};
 
 #[derive(Serialize, Deserialize)]
 pub struct PostRequest {
@@ -71,7 +71,6 @@ impl Post {
     pub async fn create_reply(user_id: i32, post: PostRequest, pool: &PgPool) -> Result<i32> {
         let mut table = pool.begin().await?;
         let replies: Vec::<i32> = vec![];
-        let id = 0;
         let created = sqlx::query!(
             r#"
             INSERT INTO posts (body, subject, user_id, reply_id, reply) 

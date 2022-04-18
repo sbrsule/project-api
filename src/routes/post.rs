@@ -1,39 +1,37 @@
 use actix_identity::Identity;
-use actix_web::{web, HttpResponse, get, post, delete, http::header::HttpDate};
+use actix_web::{web, HttpResponse, get, post, delete};
 use sqlx::PgPool;
 
-use crate::models::post::{Post, PostRequest};
+use crate::models::{post::{Post, PostRequest}};
 
 #[post("/create_post")]
 async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            let user_id= id.parse::<i32>().expect("unable to parse id");
-            match Post::create_post(user_id, post.into_inner(), pool.as_ref()).await {
-                Ok(_) => HttpResponse::Created().finish(),
-                Err(_) => HttpResponse::BadRequest().finish(),
-            }
+                match Post::create_post(id.parse::<i32>().unwrap() , post.into_inner(), pool.as_ref()).await {
+                        Ok(_) => HttpResponse::Created().finish(),
+                        Err(_) => HttpResponse::BadRequest().finish(),
+                    }
+                }
+                None => HttpResponse::NotFound().finish(),
         }
-        None => HttpResponse::Unauthorized().finish(),
     }
-}
 
 #[post("/create_reply/{id}")]
 async fn create_reply(id: Identity, post: web::Json<PostRequest>, parent_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            let user_id = id.parse::<i32>().expect("unable to parse id");
-            match Post::create_reply(user_id, post.into_inner(), pool.as_ref()).await {
-                Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
-                    Ok(_) => HttpResponse::Created().finish(),
-                    Err(_) => HttpResponse::BadRequest().finish(),
+                match Post::create_reply(id.parse::<i32>().unwrap(), post.into_inner(), pool.as_ref()).await {
+                        Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
+                            Ok(_) => HttpResponse::Created().finish(),
+                            Err(_) => HttpResponse::BadRequest().finish(),
+                        }
+                        Err(_) => HttpResponse::BadRequest().finish(),
+                    }
                 }
-                Err(_) => HttpResponse::BadRequest().finish(),
+        None => HttpResponse::BadRequest().finish()
             }
         }
-        None => HttpResponse::Unauthorized().finish()
-    }
-}
 
 #[get("/posts")]
 async fn get_top_ten(pool: web::Data<PgPool>) -> HttpResponse {
@@ -73,11 +71,10 @@ async fn delete_post(id: Identity, post_id: web::Json<i32>, pool: web::Data<PgPo
 
     match id.identity() {
         Some(id) => match id.parse::<i32>().unwrap() {
-            user_id => match Post::delete_post(post_id.clone(), pool.as_ref()).await {
+            _ => match Post::delete_post(post_id.clone(), pool.as_ref()).await {
                 Ok(_) => HttpResponse::NoContent().finish(),
                 Err(_) => HttpResponse::NotFound().finish(),
             },
-            _ => HttpResponse::Unauthorized().finish(),
         }
         None => HttpResponse::BadRequest().finish(),
     }
