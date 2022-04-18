@@ -18,7 +18,13 @@ async fn main() -> std::io::Result<()> {
         .expect("Unable to create database pool");
 
     HttpServer::new(move || {
-        let cors = actix_cors::Cors::permissive();
+        let cors = actix_cors::Cors::default()
+            .allowed_origin("https://www.darkrust.org")
+            .allowed_methods(vec!["GET", "POST", "DELETE"])
+            .allow_any_header()
+            .supports_credentials()
+            .max_age(3600);
+
 
         App::new()
         .wrap(IdentityService::new(
