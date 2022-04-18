@@ -8,25 +8,20 @@ use crate::models::{post::{Post, PostRequest}, user::User};
 async fn create_post(id: Identity, post: web::Json<PostRequest>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            match User::get_id(id, pool.as_ref()).await {
-                Ok(id) => { match Post::create_post(id , post.into_inner(), pool.as_ref()).await {
+                match Post::create_post(id.parse::<i32>().unwrap() , post.into_inner(), pool.as_ref()).await {
                         Ok(_) => HttpResponse::Created().finish(),
                         Err(_) => HttpResponse::BadRequest().finish(),
                     }
                 }
-                Err(_) => HttpResponse::NotFound().finish(),
-            }
+                None => HttpResponse::NotFound().finish(),
         }
-        None => HttpResponse::Unauthorized().finish(),
     }
-}
 
 #[post("/create_reply/{id}")]
 async fn create_reply(id: Identity, post: web::Json<PostRequest>, parent_id: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse {
     match id.identity() {
         Some(id) => {
-            match User::get_id(id, pool.as_ref()).await {
-                Ok(id) => { match Post::create_reply(id, post.into_inner(), pool.as_ref()).await {
+                match Post::create_reply(id.parse::<i32>().unwrap(), post.into_inner(), pool.as_ref()).await {
                         Ok(reply_id) => match Post::link_reply(parent_id.into_inner(), reply_id, pool.as_ref()).await {
                             Ok(_) => HttpResponse::Created().finish(),
                             Err(_) => HttpResponse::BadRequest().finish(),
@@ -34,12 +29,9 @@ async fn create_reply(id: Identity, post: web::Json<PostRequest>, parent_id: web
                         Err(_) => HttpResponse::BadRequest().finish(),
                     }
                 }
-                Err(_) => HttpResponse::NotFound().finish(),
+        None => HttpResponse::BadRequest().finish()
             }
         }
-        None => HttpResponse::Unauthorized().finish()
-    }
-}
 
 #[get("/posts")]
 async fn get_top_ten(pool: web::Data<PgPool>) -> HttpResponse {
