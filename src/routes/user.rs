@@ -1,6 +1,15 @@
 use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse};
 use sqlx::PgPool;
+use crate::models::user::{User,UserRequest};
+
+
+#[post("/register")]
+async fn create(user: web::Json<UserRequest>, pool: web::Data<PgPool>) -> HttpResponse {
+    let user = User::create(user.into_inner(), pool.as_ref()).await;
+    match user {
+        Ok(_) => HttpResponse::Created().finish(),
+
 
 use crate::models::user::{User, UserRequest, UserID};
 
@@ -68,10 +77,12 @@ async fn get_username(user_id: web::Json<UserID>, pool: web::Data<PgPool>) -> Ht
     }
 }
 
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register_user);
     cfg.service(login_user);
     cfg.service(test);
     cfg.service(logout_user);
     cfg.service(get_username);
+
 }

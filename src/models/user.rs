@@ -18,6 +18,9 @@ pub struct User {
     pub created: chrono::NaiveDateTime,
 }
 
+<<<<<<< HEAD
+#[allow(dead_code)]
+=======
 #[derive(Serialize, Deserialize)]
 pub struct UserName {
     pub username: String,
@@ -27,15 +30,23 @@ pub struct UserName {
 pub struct  UserID {
     pub id: i32,
 }
+>>>>>>> newdb
 
 #[allow(dead_code)]
 impl User {
     pub async fn create(user: UserRequest, pool: &PgPool) -> Result<User> {
         let mut table = pool.begin().await?;
         let password = password::hash_password(user.password).unwrap();
+<<<<<<< HEAD
+        println!("{}", &password);
+        let user = sqlx::query("INSERT INTO USERS (username, password_hash) values ($1, $2) RETURNING *")
+            .bind(user.username)
+            .bind(password)
+=======
         let user = sqlx::query("INSERT INTO USERS (username, password_hash) values ($1, $2) RETURNING *")
             .bind(&user.username)
             .bind(&password)
+>>>>>>> newdb
             .map(|row: PgRow| {
                 User {
                     id: row.get(0),
@@ -108,10 +119,10 @@ impl User {
         Ok(record.id)
     }
 
-    pub async fn validate_user(user: UserRequest, pool: &PgPool) -> Result<bool> {
+    pub async fn get_password(user: UserRequest, pool: &PgPool) -> Result<String> {
         let record = sqlx::query!(
             r#"
-                SELECT username, password_hash
+                SELECT password_hash 
                     FROM users
                 WHERE username = $1
             "#,
@@ -120,6 +131,8 @@ impl User {
             .fetch_one(pool)
             .await?;
 
+<<<<<<< HEAD
+=======
         Ok(password::verify_password(user.password, record.password_hash))
     }
     
@@ -134,6 +147,7 @@ impl User {
             .fetch_one(pool)
             .await?;
 
+>>>>>>> newdb
         Ok(record.password_hash)
     }
 
